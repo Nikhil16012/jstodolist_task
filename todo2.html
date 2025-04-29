@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title> 
+    <style>
+        #main{
+            display: flex;
+            justify-content: space-around;
+            margin-top: 70px;
+        }
+        #register,#login{
+            display: flex;
+            flex-direction: column;
+            width: 400px;
+            gap:20px;
+            padding: 20px;
+        background-color: forestgreen; 
+        }
+        #login{
+            background-color: brown;
+        }
+        #registerbutton,#loginbutton{
+            width: 100px;
+            background-color: blue;
+            color: white;
+        padding: 12px;
+        cursor: pointer;
+        }
+        #username1,#pass1,#username2,#pass2{
+            font-size: 20px;
+            padding: 10px;
+            border: null;
+            border-radius: 5px;
+        }
+        #list{
+            display: flex;
+            flex-direction: column;
+        }
+        #edit{
+            width:10px
+        }
+        #logout{
+            width:70px;
+            height: 35px;
+            padding: 10px;
+            font-size: 15px;
+            background-color: red;
+            color: white;
+            cursor: pointer;
+           margin-left: 600px;
+        }
+        #inp{
+            margin-left: 500px;
+            width: 200px;
+            padding: 10px;
+
+        }
+        #addbtn{
+            cursor: pointer;
+            width: 50px;
+            height: 40px;
+            background-color:brown;
+            color: white;
+        }
+        #h{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color:chocolate;
+        }
+
+        
+    </style>  
+</head>
+<body>
+    <div id="main">
+   <div id="register">
+    <h1 style="color:yellow;text-align: center;">Register</h1>
+    <input type="text" placeholder="name" id="username1">
+    <input type="password" placeholder="password" id="pass1">
+    <button onClick="register()" id="registerbutton">Register</button>
+   </div> 
+   <div id="login">
+    <h1 style="color:aqua;text-align: center;">Login</h1>
+    <input type="text" placeholder="name" id="username2">
+    <input type="password" placeholder="password" id="pass2">
+    <button onClick="login()" id="loginbutton">Login</button>
+   </div>
+    </div>
+   <div id="todo">
+    <h1 id="h"></h1>
+    <input type="text" placeholder="add items" id="inp">
+    <button onClick="addtodo()" id="addbtn" >Add</button>
+
+    <div id="list"></div>
+    <button onClick="logout()" id="logout">Logout</button>
+   </div>
+   <script>
+     let users=JSON.parse(localStorage.getItem("username"))|| {};
+     let currentuser=JSON.parse(localStorage.getItem("currentuser"))||null
+      document.getElementById("todo").style.display="none"
+     function register(){
+        let username1=document.getElementById("username1").value.trim()
+        let pass1=document.getElementById("pass1").value.trim()
+        if(!username1 || !pass1){
+            window.alert("enter the details for registeration");
+            return
+
+        }
+       
+        users[username1]={password:pass1,todo:[]}
+        currentuser=username1
+       
+        window.alert(`${currentuser} you are successfully registered`)
+        showdata()
+        document.getElementById("register").style.display="none"
+     }
+     function showdata(){
+        localStorage.setItem("username",JSON.stringify(users))
+        localStorage.setItem("currentuser",JSON.stringify(currentuser))
+     }
+     function login(){
+        let username2=document.getElementById("username2").value.trim();
+        let pass2=document.getElementById("pass2").value.trim();
+        let k=JSON.parse(localStorage.getItem('username'));
+        if(!k[username2] || k[username2].password!=pass2){
+            window.alert("login details are not correct or user first need to register")
+            return
+        }
+        
+        currentuser=username2
+        document.getElementById("register").style.display="none";
+        document.getElementById("login").style.display="none";
+        document.getElementById("todo").style.display="block";
+        window.alert(`${currentuser} you are successfull logged in`)
+        displaytodo();
+        document.getElementById("username2").value = "";
+    document.getElementById("pass2").value = "";
+     }
+     function displaytodo() {
+    let element = "";
+    let list = document.getElementById("list");
+
+    users[currentuser].todo?.map((val, index) => {
+        element += `
+            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                <span style="flex: 1; font-size: 25px;display:flex;justify-content:center;align-items:center">${val}</span>
+                <button 
+                    style="
+                        margin-right: 10px;
+                        padding: 6px 12px;
+                        font-size: 14px;
+                        color: white;
+                        background-color: blue;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                    "
+                    onClick="edit(${index})"
+                >
+                    Edit
+                </button>
+                <button 
+                    style="
+                        padding: 6px 12px;
+                        font-size: 14px;
+                        color: white;
+                        background-color: red;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                    "
+                    onClick="del(${index})"
+                >
+                    Delete
+                </button>
+            </div>
+        `;
+    });
+    document.getElementById("h").innerHTML=`${currentuser} Todo tasks `
+    list.innerHTML = element;
+}
+     function addtodo(){
+        
+        let inp=document.getElementById("inp").value.trim()
+        if(!inp){
+            window.alert("todo cannot be empty")
+            return
+        }
+        users[currentuser].todo.push(inp)
+        
+        showdata()
+        displaytodo()
+     }
+     function edit(index){
+        let input = prompt("Edit your todo:", users[currentuser].todo[index]);
+     if (input !== null && input.trim() !== "") {
+         users[currentuser].todo[index] = input.trim();
+         showdata();
+         displaytodo();
+     }
+     }
+     function del(index){
+        users[currentuser].todo.splice(index,1)
+        showdata()
+        displaytodo()
+     }
+     function logout(){
+        localStorage.removeItem("currentuser")
+        document.getElementById("register").style.display="block";
+        document.getElementById("login").style.display="block";
+        document.getElementById("todo").style.display='none';
+        window.alert(`${currentuser} you are logged out`)
+            currentuser=''
+            password=''
+     }
+     window.onload = function(){
+        if(currentuser){
+     document.getElementById("register").style.display="none";
+        document.getElementById("login").style.display="none";
+        document.getElementById("todo").style.display='block';
+        displaytodo()
+        }
+     }
+
+
+   </script>
+</body>
+</html>
